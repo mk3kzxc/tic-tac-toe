@@ -50,16 +50,17 @@ public:
 		return true;
 	}
 
-	void Print() {
+	/*void Print() {
 		int SIZE = this->SIZE;
 
 		for (int i = 0; i < SIZE; i++) {
+			cout << " ";
 			for (int j = 0; j < SIZE; j++) {
 				cout << this->arr[i][j] << " " ;
 			}
 			cout << endl;
 		}
-	}
+	}*/
 };
 
 class Game : public GArray {
@@ -82,49 +83,73 @@ public:
 #endif
 	}
 
-	int CheckWin() { // FIXME
+	int CheckWin() {
 		int SIZE = this->GetSize();
 
 		for (int i = 0; i < SIZE; i++) {
 			for (int j = 0; j < SIZE; j++) {
-				int el = arr.GetElement(i, j);
+				int el = this->GetElement(i, j);
 
 				if (el == 0) {
 					continue;
 				}
 
-				else if (el == null) {
+				if ((el == null) || (el == cross)) {
 
-					if (i == 0) {
-						if (arr.GetElement(i, j + 1) == null) {
-							if (arr.GetElement(i, j + 2) == null) {
+					if (j < SIZE - 1) {
+						if ((this->GetElement(i, j + 1) == el) && (this->GetElement(i, j + 2) == el)) {
+
+							if (el == null) {
 								return 1;
 							}
-						}
-
-						if (arr.GetElement(i + 1, j) == null) {
-							if (arr.GetElement(i + 2, j) == null) {
-								return 1;
+							if (el == cross) {
+								return 2;
 							}
-						}
-					}
 
-					if (i == 0 && j == 0) {
-						if (arr.GetElement(i + 1, j + 1) == null) {
-							if (arr.GetElement(i + 2, j + 2) == null) {
-								return 1;
-							}
 						}
 					}
 
-					if (i == 2 && j == 2) {
-						if (arr.GetElement(i - 1, j - 1) == null) {
-							if (arr.GetElement(i - 2, j - 2) == null) {
+					if (i < SIZE - 1) {
+						if ((this->GetElement(i + 1, j) == el) && (this->GetElement(i + 2, j) == el)) {
+
+							if (el == null) {
 								return 1;
 							}
+							if (el == cross) {
+								return 2;
+							}
+
+						}
+					}
+
+					if ((i < SIZE - 2) && (j < SIZE - 2)) {
+						if ((this->GetElement(i + 1, j + 1) == el) && (this->GetElement(i + 2, j + 2) == el)) {
+
+							if (el == null) {
+								return 1;
+							}
+							if (el == cross) {
+								return 2;
+							}
+
+						}
+					}
+
+
+					if ((i < SIZE - 2) && (j > 1)) {
+						if ((j == 2) && (this->GetElement(i + 1, j - 1) == el) && (this->GetElement(i + 2, j - 2) == el)) {
+
+							if (el == null) {
+								return 1;
+							}
+							if (el == cross) {
+								return 2;
+							}
+
 						}
 					}
 				}
+
 
 			}
 		}
@@ -152,22 +177,114 @@ public:
 		}
 		return false;
 	}
+
+	void Print() {
+		int SIZE = this->GetSize();
+
+		for (int i = 0; i < SIZE; i++) {
+			cout << " ";
+			for (int j = 0; j < SIZE; j++) {
+				char symb;
+				switch (this->GetElement(i,j)) {
+				case 1:
+					symb = 'O';
+					break;
+				case 2:
+					symb = 'X';
+					break;
+				default:
+					symb = ' ';
+					break;
+				}
+				cout << symb << " ";
+			}
+			cout << endl;
+		}
+	}
 };
 
 int main() {
 	setlocale(LC_ALL, "Rus");
 
 	Game arr;
+	int winner{}, move{};
 
-	arr.Print();
+	while (!winner) {
+		system("cls");
 
-	arr.MakeMove(0, 0, false);
-	arr.MakeMove(1, 0, false);
-	arr.MakeMove(2, 0, false);
+		char xod;
+		int i,j;
+		if ((move == 0) || (move == 1)) {
+			move = 1;
+			xod = 'O';
+		}
+		else {
+			move = 2;
+			xod = 'X';
+		}
 
-	//cout << arr.GetElement(0, 0) << endl << arr.GetElement(1, 0) << endl << arr.GetElement(2, 0) << endl << endl;;
+		cout << "+------------------------------+" << endl;
+		cout << "Крестики-Нолики\nХодит: " << xod << endl;
+		cout << "+------+-----------------------+" << endl;
 
-	cout << endl;
-	arr.Print();
-	cout << endl << arr.CheckWin();
+		arr.Print();
+		cout << "+------+" << endl;
+		int win = arr.CheckWin();
+		if (win == 1) {
+			winner = 1;
+			cout << "Победил нолик! Игра окончена." << endl;
+			break;
+			system("pause");
+		}
+		else if (win == 2) {
+			winner = 2;
+			cout << "Победил крестик! Игра окончена." << endl;
+			break;
+			system("pause");
+		}
+		cout << "Введите номер колонки и строки соответственно, где вы хотите сходить (от 1 до 3)" << endl;
+		cin >> i >> j;
+		if ((i >= 1) && (i <= 3) && (j >= 1) && (j <= 3)) {
+			bool movv;
+			if (move == 1) {
+				movv = false;
+			}
+			else {
+				movv = true;
+			}
+			int res = arr.MakeMove(j - 1, i - 1, movv);
+
+			if (res == false) {
+				cout << "Сюда уже кто то сходил! Попробуйте еще раз" << endl;
+				if (move == 1) {
+					move = 0;
+				}
+				else {
+					move = 2;
+				}
+				system("pause");
+			} 
+			if (res == true) {
+				if (move == 1) {
+					move = 2;
+				}
+				else if (move==2) {
+					move = 1;
+				}
+			}
+		}
+
+		else {
+			cout << "Вы неправильно ввели колонку или строку. Попробуйте еще раз" << endl;
+			if (move == 1) {
+				move = 0;
+			}
+			else {
+				move = 2;
+			}
+			system("pause");
+		}
+
+		
+	}
 }
