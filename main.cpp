@@ -35,6 +35,9 @@ public:
 	}
 
 	int GetElement(int row, int col) {
+#ifdef DEBUG
+		cout << "Получено значение в массиве по индексу [" << row << "][" << col << "] (" << this->arr[row][col] << ")" << endl;
+#endif
 		return this->arr[row][col];
 	}
 
@@ -83,7 +86,7 @@ public:
 #endif
 	}
 
-	int CheckWin() { // FIXME
+	int CheckWin() {
 		int SIZE = this->GetSize();
 
 		for (int i = 0; i < SIZE; i++) {
@@ -96,7 +99,7 @@ public:
 
 				if ((el == null) || (el == cross)) {
 
-					if (j < SIZE - 1) {
+					if (j < SIZE - 2) {
 						if ((this->GetElement(i, j + 1) == el) && (this->GetElement(i, j + 2) == el)) {
 
 							if (el == null) {
@@ -109,7 +112,7 @@ public:
 						}
 					}
 
-					if (i < SIZE - 1) {
+					if (i < SIZE - 2) {
 						if ((this->GetElement(i + 1, j) == el) && (this->GetElement(i + 2, j) == el)) {
 
 							if (el == null) {
@@ -201,61 +204,109 @@ public:
 			cout << endl;
 		}
 	}
+
+	bool CheckForNulls() {
+		int SIZE = this->GetSize();
+
+		for (int i = 0; i < SIZE; i++) {
+			for (int j = 0; j < SIZE; j++) {
+				if (this->GetElement(i, j) == 0) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
 };
 
-int main() {
-	setlocale(LC_ALL, "Rus");
+class SinglePlay : public Game {
+public:
+	SinglePlay() {
+		Game arr;
+		int move{};
 
-	Game arr;
-	int winner{}, move{};
+		while (true) {
+			system("cls");
 
-	while (!winner) {
-		system("cls");
+			char xod;
+			int i, j;
 
-		char xod;
-		int i,j;
-		if ((move == 0) || (move == 1)) {
-			move = 1;
-			xod = 'O';
-		}
-		else {
-			move = 2;
-			xod = 'X';
-		}
 
-		cout << "+------------------------------+" << endl;
-		cout << "Крестики-Нолики\nХодит: " << xod << endl;
-		cout << "+------+-----------------------+" << endl;
 
-		arr.Print();
-		cout << "+------+" << endl;
-		int win = arr.CheckWin();
-		if (win == 1) {
-			winner = 1;
-			cout << "Победил нолик! Игра окончена." << endl;
-			break;
-			system("pause");
-		}
-		else if (win == 2) {
-			winner = 2;
-			cout << "Победил крестик! Игра окончена." << endl;
-			break;
-			system("pause");
-		}
-		cout << "Введите номер колонки и строки соответственно, где вы хотите сходить (от 1 до 3)" << endl;
-		cin >> i >> j;
-		if ((i >= 1) && (i <= 3) && (j >= 1) && (j <= 3)) {
-			bool movv;
-			if (move == 1) {
-				movv = false;
+			if ((move == 0) || (move == 1)) {
+				move = 1;
+				xod = 'O';
 			}
 			else {
-				movv = true;
+				move = 2;
+				xod = 'X';
 			}
-			int res = arr.MakeMove(j - 1, i - 1, movv);
 
-			if (res == false) {
-				cout << "Сюда уже кто то сходил! Попробуйте еще раз" << endl;
+			cout << "+------------------------------+" << endl;
+			cout << "Крестики-Нолики\nХодит: " << xod << endl;
+			cout << "+------+-----------------------+" << endl;
+
+			arr.Print();
+			cout << "+------+" << endl;
+
+			int win = arr.CheckWin();
+
+			if (win == 1) {
+				cout << "Победил нолик! Игра окончена." << endl;
+				system("pause");
+				break;
+			}
+			else if (win == 2) {
+				cout << "Победил крестик! Игра окончена." << endl;
+				system("pause");
+				break;
+			}
+
+			if (!arr.CheckForNulls()) {
+				cout << "Ничья! Игра окончена." << endl;
+				system("pause");
+				break;
+			}
+
+			cout << "Введите номер колонки и строки соответственно, где вы хотите сходить (от 1 до 3)" << endl;
+			cin >> i >> j;
+
+			if ((i >= 1) && (i <= 3) && (j >= 1) && (j <= 3)) {
+				bool movv;
+
+				if (move == 1) {
+					movv = false;
+				}
+				else {
+					movv = true;
+				}
+
+				int res = arr.MakeMove(j - 1, i - 1, movv);
+
+				if (res == false) {
+					cout << "Сюда уже кто то сходил! Попробуйте еще раз" << endl;
+					if (move == 1) {
+						move = 0;
+					}
+					else {
+						move = 2;
+					}
+					system("pause");
+				}
+
+				if (res == true) {
+					if (move == 1) {
+						move = 2;
+					}
+					else if (move == 2) {
+						move = 1;
+					}
+				}
+			}
+
+			else {
+				cout << "Вы неправильно ввели колонку или строку. Попробуйте еще раз" << endl;
 				if (move == 1) {
 					move = 0;
 				}
@@ -263,28 +314,22 @@ int main() {
 					move = 2;
 				}
 				system("pause");
-			} 
-			if (res == true) {
-				if (move == 1) {
-					move = 2;
-				}
-				else if (move==2) {
-					move = 1;
-				}
 			}
-		}
 
-		else {
-			cout << "Вы неправильно ввели колонку или строку. Попробуйте еще раз" << endl;
-			if (move == 1) {
-				move = 0;
-			}
-			else {
-				move = 2;
-			}
-			system("pause");
-		}
 
-		
+		}
 	}
+};
+
+int main() {
+	setlocale(LC_ALL, "Rus");
+
+	int mode;
+
+	cout << "Крестики-Нолики\nВыберите режим (нужно ввести код режима):\n1 - Одиночная игра\n2 - Игра с ботом (в разработке)\n3 - Игра по сети (в разработке)" << endl;
+	cin >> mode;
+	if (mode == 1) {
+		SinglePlay p;
+	}
+	
 }
